@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="description" content="Perpustakaan Impluse - Prompt Vault Jailbreak">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co https://apis.google.com https://accounts.google.com https://i.ibb.co.com https://ibb.co.com 'unsafe-inline' 'unsafe-eval' data: blob:;">
+<title>Perpustakaan Impluse</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg-primary:#0a0a0a;--bg-secondary:#111111;--bg-tertiary:#1a1a1a;
+--bg-card:#141414;--bg-hover:#1e1e1e;--bg-input:#0d0d0d;
+--text-primary:#ffffff;--text-secondary:#a0a0a0;--text-muted:#666666;
+--border-color:#222222;--border-light:#333333;
+--accent:#ffffff;--accent-dim:#888888;
+--green:#00cc66;--green-dark:#009944;--red:#ff4444;--red-dark:#cc0000;
+--blue:#4488ff;--yellow:#ffaa00;--purple:#aa66ff;
+--shadow-sm:0 2px 8px rgba(0,0,0,0.3);--shadow-md:0 4px 16px rgba(0,0,0,0.4);
+--shadow-lg:0 8px 32px rgba(0,0,0,0.5);--shadow-xl:0 16px 64px rgba(0,0,0,0.6);
+--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:24px;
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+--font-main:'Inter',sans-serif;--font-display:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-main);background:var(--bg-primary);color:var(--text-primary);
+overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg-primary)}
+::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,textarea,select{outline:none;border:none;font-family:inherit}
+img{max-width:100%;display:block}
+
+/* ===== LOADING SCREEN ===== */
+#loading-screen{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;
+background:var(--bg-primary);display:flex;flex-direction:column;
+align-items:center;justify-content:center;transition:opacity 0.8s ease
+}
+#loading-screen.fade-out{opacity:0;pointer-events:none}
+.loading-title{
+font-family:var(--font-display);font-size:clamp(2rem,6vw,3.2rem);font-weight:800;
+color:var(--text-primary);margin-bottom:8px;letter-spacing:-1px;
+animation:loadPulse 2s ease-in-out infinite
+}
+.loading-subtitle{
+font-size:0.85rem;color:var(--text-muted);margin-bottom:40px;
+text-align:center;max-width:340px;line-height:1.6;padding:0 20px
+}
+@keyframes loadPulse{
+0%,100%{opacity:1;transform:scale(1)}
+50%{opacity:0.5;transform:scale(0.97)}
+}
+.loader-container{position:relative;width:70px;height:70px}
+.loader-ring{
+width:70px;height:70px;border-radius:50%;position:absolute;
+border:3px solid var(--border-color);border-top-color:var(--text-primary);
+animation:spin 1s linear infinite
+}
+.loader-ring-inner{
+width:50px;height:50px;border-radius:50%;position:absolute;
+top:10px;left:10px;
+border:2px solid transparent;border-top-color:var(--text-muted);
+animation:spin 0.7s linear infinite reverse
+}
+.loader-dot{
+width:8px;height:8px;border-radius:50%;background:var(--text-primary);
+position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+animation:dotPulse 1.5s ease-in-out infinite
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes dotPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.8);opacity:.3}}
+
+/* ===== BLACK HOLE BG ===== */
+.blackhole-bg{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;
+overflow:hidden;pointer-events:none
+}
+.bh-ring{
+position:absolute;border-radius:50%;
+border:1px solid rgba(255,255,255,0.025);
+top:50%;left:50%;transform:translate(-50%,-50%)
+}
+.bh-ring:nth-child(1){width:200px;height:200px;animation:bhR 20s linear infinite}
+.bh-ring:nth-child(2){width:400px;height:400px;animation:bhR 30s linear infinite reverse}
+.bh-ring:nth-child(3){width:600px;height:600px;animation:bhR 40s linear infinite}
+.bh-ring:nth-child(4){width:800px;height:800px;animation:bhR 50s linear infinite reverse}
+.bh-ring:nth-child(5){width:1000px;height:1000px;animation:bhR 60s linear infinite}
+.bh-ring:nth-child(6){width:1200px;height:1200px;animation:bhR 70s linear infinite reverse}
+.bh-core{
+position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+width:80px;height:80px;border-radius:50%;
+background:radial-gradient(circle,#000 0%,rgba(0,0,0,0.7) 50%,transparent 70%);
+box-shadow:0 0 120px 60px rgba(0,0,0,0.6)
+}
+@keyframes bhR{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* ===== LOGIN SCREEN ===== */
+#login-screen{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:9000;
+background:var(--bg-primary);display:none;flex-direction:column;
+align-items:center;justify-content:center
+}
+#login-screen.active{display:flex}
+.login-container{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-xl);padding:48px 40px;
+max-width:420px;width:90%;text-align:center;
+box-shadow:var(--shadow-xl);position:relative;overflow:hidden
+}
+.login-container::before{
+content:'';position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,transparent,var(--text-primary),transparent)
+}
+.login-logo-text{font-family:var(--font-display);font-size:2rem;font-weight:800;margin-bottom:4px}
+.login-logo-sub{color:var(--text-muted);font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.login-btn{
+width:100%;padding:14px 24px;border-radius:var(--radius-md);
+font-size:0.95rem;font-weight:600;transition:var(--transition);
+display:flex;align-items:center;justify-content:center;gap:12px;
+margin-bottom:12px
+}
+.login-btn-google{background:var(--text-primary);color:var(--bg-primary)}
+.login-btn-google:hover{background:#e0e0e0;transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.login-btn-guest{background:transparent;color:var(--text-secondary);border:1px solid var(--border-light)}
+.login-btn-guest:hover{background:var(--bg-hover);border-color:var(--text-muted);transform:translateY(-2px)}
+.login-divider{display:flex;align-items:center;gap:16px;margin:20px 0;color:var(--text-muted);font-size:0.8rem}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border-color)}
+.login-note{font-size:0.75rem;color:var(--text-muted);margin-top:20px;line-height:1.6}
+.login-note i{color:var(--yellow)}
+
+/* ===== WELCOME POPUP ===== */
+#welcome-popup{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:8500;
+background:rgba(0,0,0,0.88);backdrop-filter:blur(24px);
+display:none;align-items:center;justify-content:center
+}
+#welcome-popup.active{display:flex}
+.welcome-card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-xl);padding:48px 40px;
+max-width:440px;width:90%;text-align:center;
+box-shadow:var(--shadow-xl);animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1)
+}
+@keyframes popIn{from{opacity:0;transform:scale(0.75) translateY(30px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.welcome-img{
+width:120px;height:120px;margin:0 auto 24px;border-radius:50%;
+overflow:hidden;border:3px solid var(--border-light);background:var(--bg-tertiary)
+}
+.welcome-img img{width:100%;height:100%;object-fit:cover}
+.welcome-title{font-family:var(--font-display);font-size:1.8rem;font-weight:700;margin-bottom:8px}
+.welcome-sub{color:var(--text-muted);font-size:0.9rem;margin-bottom:32px}
+.welcome-btn{
+background:var(--green);color:#fff;padding:14px 36px;
+border-radius:var(--radius-md);font-weight:600;font-size:1rem;
+transition:var(--transition);display:inline-flex;align-items:center;gap:8px
+}
+.welcome-btn:hover{background:var(--green-dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,204,102,0.25)}
+.welcome-copy{font-size:0.7rem;color:var(--text-muted);margin-top:24px}
+
+/* ===== COUNTDOWN OVERLAY ===== */
+#countdown-overlay{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:9500;
+background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);
+display:none;flex-direction:column;align-items:center;justify-content:center
+}
+#countdown-overlay.active{display:flex}
+.cd-logo{width:80px;height:80px;margin-bottom:24px;border-radius:50%;overflow:hidden;border:2px solid var(--border-light)}
+.cd-logo img{width:100%;height:100%;object-fit:cover}
+.cd-number{
+font-family:var(--font-display);font-size:5rem;font-weight:900;
+color:var(--text-primary);animation:cdPulse 1s ease-in-out infinite
+}
+@keyframes cdPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.6}}
+.cd-text{color:var(--text-muted);font-size:0.9rem;margin-top:8px}
+
+/* ===== NAVBAR ===== */
+#main-app{display:none}
+#main-app.active{display:block}
+.navbar{
+position:sticky;top:0;z-index:1000;
+background:rgba(10,10,10,0.88);backdrop-filter:blur(24px);
+border-bottom:1px solid var(--border-color);
+padding:0 24px;height:64px;
+display:flex;align-items:center;justify-content:space-between
+}
+.nav-logo{
+font-family:var(--font-display);font-size:1.3rem;font-weight:700;
+display:flex;align-items:center;gap:10px
+}
+.nav-logo-icon{width:32px;height:32px;border-radius:8px;overflow:hidden;background:var(--bg-tertiary)}
+.nav-logo-icon img{width:100%;height:100%;object-fit:cover}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-user{
+display:flex;align-items:center;gap:8px;
+padding:6px 12px;border-radius:var(--radius-sm);
+background:var(--bg-tertiary);font-size:0.85rem;
+cursor:pointer;transition:var(--transition)
+}
+.nav-user:hover{background:var(--bg-hover)}
+.nav-user-avatar{
+width:28px;height:28px;border-radius:50%;
+background:var(--border-light);display:flex;
+align-items:center;justify-content:center;font-size:0.7rem;overflow:hidden
+}
+.nav-user-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-icon-btn{
+width:36px;height:36px;border-radius:var(--radius-sm);
+background:var(--bg-tertiary);display:flex;align-items:center;
+justify-content:center;transition:var(--transition);cursor:pointer;
+position:relative
+}
+.nav-icon-btn:hover{background:var(--bg-hover)}
+.nav-badge{
+position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;
+border-radius:8px;background:var(--red);font-size:0.6rem;
+display:none;align-items:center;justify-content:center;font-weight:700;
+padding:0 4px
+}
+.nav-badge.show{display:flex}
+@media(max-width:768px){
+.nav-user span{display:none}
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar{
+position:fixed;top:0;right:-320px;width:300px;height:100%;z-index:5000;
+background:var(--bg-secondary);border-left:1px solid var(--border-color);
+transition:right 0.35s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;padding:20px
+}
+#sidebar.open{right:0}
+#sidebar-overlay{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:4999;
+background:rgba(0,0,0,0.5);display:none;transition:opacity 0.3s
+}
+#sidebar-overlay.active{display:block}
+.sb-header{
+display:flex;align-items:center;justify-content:space-between;
+margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border-color)
+}
+.sb-close{
+width:32px;height:32px;border-radius:var(--radius-sm);
+background:var(--bg-tertiary);display:flex;align-items:center;
+justify-content:center;transition:var(--transition)
+}
+.sb-close:hover{background:var(--bg-hover)}
+.sb-profile{
+padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-md);
+margin-bottom:20px;text-align:center
+}
+.sb-avatar{
+width:56px;height:56px;border-radius:50%;margin:0 auto 8px;
+background:var(--border-light);display:flex;align-items:center;
+justify-content:center;font-size:1.2rem;overflow:hidden
+}
+.sb-avatar img{width:100%;height:100%;object-fit:cover}
+.sb-name{font-weight:600;font-size:0.95rem;margin-bottom:2px}
+.sb-email{font-size:0.75rem;color:var(--text-muted);word-break:break-all}
+.sb-role{display:inline-block;padding:2px 10px;border-radius:4px;font-size:0.7rem;font-weight:600;margin-top:6px}
+.sb-role.owner{background:var(--yellow);color:#000}
+.sb-role.admin{background:var(--purple);color:#fff}
+.sb-role.member{background:var(--border-light);color:var(--text-secondary)}
+.sb-menu{list-style:none}
+.sb-menu li{margin-bottom:2px}
+.sb-menu li a,.sb-menu li button{
+display:flex;align-items:center;gap:12px;padding:11px 16px;
+border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text-secondary);
+transition:var(--transition);width:100%;background:transparent;text-align:left
+}
+.sb-menu li a:hover,.sb-menu li button:hover{background:var(--bg-hover);color:var(--text-primary)}
+.sb-menu li a.active{background:var(--bg-hover);color:var(--text-primary)}
+.sb-menu li a i,.sb-menu li button i{width:20px;text-align:center;font-size:0.9rem}
+.sb-section{
+font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;
+color:var(--text-muted);padding:14px 16px 6px;font-weight:600
+}
+
+/* ===== PAGES ===== */
+.page{display:none;padding:24px;max-width:1200px;margin:0 auto}
+.page.active{display:block}
+
+/* ===== HERO ===== */
+.hero{text-align:center;padding:48px 20px 32px;position:relative}
+.hero-logo{
+width:100px;height:100px;margin:0 auto 20px;border-radius:50%;
+overflow:hidden;border:3px solid var(--border-light)
+}
+.hero-logo img{width:100%;height:100%;object-fit:cover}
+.hero-title{
+font-family:var(--font-display);font-size:clamp(1.8rem,5vw,2.6rem);
+font-weight:800;margin-bottom:8px;letter-spacing:-1px
+}
+.hero-sub{color:var(--text-muted);font-size:1rem;margin-bottom:36px}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.hero-stat-num{font-family:var(--font-display);font-size:2.2rem;font-weight:700}
+.hero-stat-label{font-size:0.8rem;color:var(--text-muted)}
+
+/* ===== SEARCH & FILTER ===== */
+.search-section{margin-bottom:28px}
+.search-bar{
+display:flex;align-items:center;gap:12px;
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);padding:4px 4px 4px 20px;
+margin-bottom:16px;transition:var(--transition)
+}
+.search-bar:focus-within{border-color:var(--text-muted)}
+.search-bar i{color:var(--text-muted);font-size:1.05rem}
+.search-bar input{flex:1;background:transparent;color:var(--text-primary);font-size:0.95rem;padding:12px 0}
+.search-bar input::placeholder{color:var(--text-muted)}
+.search-bar .search-go{
+padding:10px 20px;border-radius:var(--radius-md);
+background:var(--text-primary);color:var(--bg-primary);
+font-weight:600;font-size:0.85rem;transition:var(--transition)
+}
+.search-bar .search-go:hover{background:#e0e0e0}
+.filter-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filter-chip{
+padding:8px 16px;border-radius:20px;font-size:0.8rem;
+background:var(--bg-tertiary);color:var(--text-secondary);
+border:1px solid var(--border-color);transition:var(--transition);
+cursor:pointer;white-space:nowrap
+}
+.filter-chip:hover{background:var(--bg-hover);border-color:var(--text-muted)}
+.filter-chip.active{background:var(--text-primary);color:var(--bg-primary);border-color:var(--text-primary)}
+.sort-select{
+padding:8px 32px 8px 14px;border-radius:20px;font-size:0.8rem;
+background:var(--bg-tertiary);color:var(--text-secondary);
+border:1px solid var(--border-color);cursor:pointer;
+appearance:none;-webkit-appearance:none;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-position:right 12px center
+}
+
+/* ===== CARDS ===== */
+.cards-grid{
+display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+gap:20px;margin-bottom:28px
+}
+@media(max-width:400px){.cards-grid{grid-template-columns:1fr}}
+.card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);padding:24px;
+transition:var(--transition);position:relative;overflow:hidden
+}
+.card::before{
+content:'';position:absolute;top:0;left:0;right:0;height:1px;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
+transition:var(--transition)
+}
+.card:hover{transform:translateY(-4px);border-color:var(--border-light);box-shadow:var(--shadow-lg)}
+.card:hover::before{background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent)}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.card-title{font-weight:700;font-size:1.05rem;flex:1;margin-right:8px}
+.card-badge{
+padding:4px 10px;border-radius:12px;font-size:0.7rem;font-weight:600;
+background:var(--bg-tertiary);color:var(--text-secondary);
+border:1px solid var(--border-color);white-space:nowrap
+}
+.card-meta{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:0.8rem;color:var(--text-muted)}
+.card-meta span{display:flex;align-items:center;gap:4px}
+.card-desc{
+font-size:0.85rem;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;
+display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden
+}
+.card-footer{
+display:flex;align-items:center;justify-content:space-between;
+padding-top:12px;border-top:1px solid var(--border-color)
+}
+.card-chars{font-size:0.75rem;color:var(--text-muted)}
+.card-actions{display:flex;gap:8px}
+.card-btn{
+padding:8px 14px;border-radius:var(--radius-sm);font-size:0.8rem;
+font-weight:500;transition:var(--transition);display:flex;align-items:center;gap:6px
+}
+.card-btn-copy{background:var(--text-primary);color:var(--bg-primary)}
+.card-btn-copy:hover{background:#e0e0e0;transform:translateY(-1px)}
+.card-btn-dl{background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color)}
+.card-btn-dl:hover{background:var(--bg-hover)}
+
+/* ===== PAGINATION ===== */
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin:28px 0}
+.pg-btn{
+width:40px;height:40px;border-radius:var(--radius-sm);
+background:var(--bg-tertiary);color:var(--text-secondary);
+display:flex;align-items:center;justify-content:center;
+font-size:0.85rem;font-weight:500;transition:var(--transition);
+border:1px solid var(--border-color)
+}
+.pg-btn:hover{background:var(--bg-hover);border-color:var(--text-muted)}
+.pg-btn.active{background:var(--text-primary);color:var(--bg-primary);border-color:var(--text-primary)}
+
+/* ===== STORE ===== */
+.store-grid{
+display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+gap:20px;margin-top:20px
+}
+.store-card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);overflow:hidden;transition:var(--transition)
+}
+.store-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--border-light)}
+.store-card-img{
+width:100%;height:200px;background:var(--bg-tertiary);
+display:flex;align-items:center;justify-content:center;overflow:hidden
+}
+.store-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s}
+.store-card:hover .store-card-img img{transform:scale(1.05)}
+.store-card-img i{font-size:3rem;color:var(--text-muted)}
+.store-card-body{padding:20px}
+.store-card-name{font-weight:700;font-size:1.05rem;margin-bottom:6px}
+.store-card-price{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:8px}
+.store-card-desc{font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;line-height:1.5}
+.store-card-actions{display:flex;gap:8px}
+.store-btn{
+padding:10px 16px;border-radius:var(--radius-sm);font-size:0.85rem;
+font-weight:600;transition:var(--transition);flex:1;text-align:center;
+display:flex;align-items:center;justify-content:center;gap:6px
+}
+.store-btn-buy{background:var(--green);color:#fff}
+.store-btn-buy:hover{background:var(--green-dark);transform:translateY(-1px)}
+.store-btn-report{background:transparent;color:var(--text-muted);border:1px solid var(--border-color);flex:0}
+.store-btn-report:hover{background:var(--bg-hover);color:var(--red)}
+
+/* ===== CHAT ===== */
+.chat-container{
+display:flex;flex-direction:column;height:calc(100vh - 120px);
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);overflow:hidden
+}
+.chat-top{
+padding:16px 20px;border-bottom:1px solid var(--border-color);
+display:flex;align-items:center;justify-content:space-between;background:var(--bg-secondary)
+}
+.chat-top-title{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:onlinePulse 2s infinite}
+@keyframes onlinePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,204,102,0.4)}50%{box-shadow:0 0 0 6px rgba(0,204,102,0)}}
+.chat-announce{
+padding:10px 20px;background:linear-gradient(90deg,var(--bg-tertiary),var(--bg-secondary));
+border-bottom:1px solid var(--border-color);font-size:0.83rem;
+display:none;align-items:center;gap:8px
+}
+.chat-announce.show{display:flex}
+.chat-announce i{color:var(--yellow);font-size:0.9rem}
+.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{display:flex;gap:10px;max-width:75%;animation:msgSlide 0.3s ease}
+@keyframes msgSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg.own{align-self:flex-end;flex-direction:row-reverse}
+.chat-msg-av{
+width:32px;height:32px;border-radius:50%;flex-shrink:0;
+background:var(--bg-tertiary);display:flex;align-items:center;
+justify-content:center;font-size:0.7rem;overflow:hidden
+}
+.chat-msg-av img{width:100%;height:100%;object-fit:cover}
+.chat-msg-body{background:var(--bg-tertiary);border-radius:var(--radius-md);padding:10px 14px;position:relative}
+.chat-msg.own .chat-msg-body{background:var(--border-light)}
+.chat-msg-name{font-size:0.72rem;font-weight:600;color:var(--accent-dim);margin-bottom:2px}
+.chat-msg-text{font-size:0.88rem;line-height:1.5;word-break:break-word}
+.chat-msg-time{font-size:0.65rem;color:var(--text-muted);margin-top:4px;text-align:right}
+.chat-msg-acts{display:flex;gap:4px;margin-top:4px;opacity:0;transition:opacity 0.2s}
+.chat-msg-body:hover .chat-msg-acts{opacity:1}
+.chat-msg-act{
+padding:2px 6px;border-radius:4px;font-size:0.65rem;
+background:var(--bg-primary);color:var(--text-muted);transition:var(--transition)
+}
+.chat-msg-act:hover{color:var(--text-primary)}
+.chat-input-row{
+padding:14px 20px;border-top:1px solid var(--border-color);
+display:flex;gap:10px;align-items:center
+}
+.chat-input-row input{
+flex:1;padding:12px 16px;border-radius:var(--radius-md);
+background:var(--bg-input);color:var(--text-primary);
+border:1px solid var(--border-color);font-size:0.9rem;transition:var(--transition)
+}
+.chat-input-row input:focus{border-color:var(--text-muted)}
+.chat-send{
+width:44px;height:44px;border-radius:var(--radius-md);
+background:var(--text-primary);color:var(--bg-primary);
+display:flex;align-items:center;justify-content:center;
+font-size:1rem;transition:var(--transition)
+}
+.chat-send:hover{background:#e0e0e0;transform:scale(1.05)}
+.chat-locked{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.chat-locked i{font-size:2.5rem;margin-bottom:16px;display:block;opacity:0.5}
+
+/* ===== FORMS ===== */
+.form-card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);padding:32px;max-width:600px;margin:0 auto
+}
+.form-card h3{font-size:1.15rem;margin-bottom:20px;font-weight:700}
+.fg{margin-bottom:20px}
+.fg label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:8px;color:var(--text-secondary)}
+.fg input,.fg textarea,.fg select{
+width:100%;padding:12px 16px;border-radius:var(--radius-md);
+background:var(--bg-input);color:var(--text-primary);
+border:1px solid var(--border-color);font-size:0.9rem;transition:var(--transition)
+}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--text-muted)}
+.fg textarea{resize:vertical;min-height:100px}
+.fg select{
+cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:36px;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-position:right 14px center
+}
+.fg select option{background:var(--bg-secondary);color:var(--text-primary)}
+.submit-btn{
+width:100%;padding:14px;border-radius:var(--radius-md);
+background:var(--text-primary);color:var(--bg-primary);
+font-weight:700;font-size:0.95rem;transition:var(--transition);
+display:flex;align-items:center;justify-content:center;gap:8px
+}
+.submit-btn:hover{background:#e0e0e0;transform:translateY(-2px)}
+.submit-btn:active{transform:translateY(0)}
+.submit-btn:disabled{opacity:0.5;pointer-events:none}
+
+/* ===== ADMIN TABS ===== */
+.admin-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.admin-tab{
+padding:10px 20px;border-radius:var(--radius-sm);
+background:var(--bg-tertiary);color:var(--text-secondary);
+font-size:0.85rem;font-weight:500;transition:var(--transition);
+border:1px solid var(--border-color)
+}
+.admin-tab:hover{background:var(--bg-hover)}
+.admin-tab.active{background:var(--text-primary);color:var(--bg-primary);border-color:var(--text-primary)}
+.admin-panel{display:none}
+.admin-panel.active{display:block}
+.upload-card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);padding:32px
+}
+.upload-card h3{font-size:1.1rem;margin-bottom:20px;font-weight:700}
+.chk-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chk-item{
+display:flex;align-items:center;gap:6px;padding:6px 14px;
+border-radius:20px;background:var(--bg-tertiary);
+border:1px solid var(--border-color);cursor:pointer;
+font-size:0.8rem;transition:var(--transition);user-select:none
+}
+.chk-item:hover{background:var(--bg-hover)}
+.chk-item input{display:none}
+.chk-item.checked{background:var(--text-primary);color:var(--bg-primary);border-color:var(--text-primary)}
+.file-upload{
+border:2px dashed var(--border-color);border-radius:var(--radius-md);
+padding:32px;text-align:center;cursor:pointer;transition:var(--transition)
+}
+.file-upload:hover{border-color:var(--text-muted);background:var(--bg-hover)}
+.file-upload i{font-size:2rem;color:var(--text-muted);margin-bottom:8px}
+.file-upload p{font-size:0.85rem;color:var(--text-muted)}
+.file-upload input{display:none}
+
+/* ===== REPORT/REQUEST CARDS ===== */
+.rr-card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-md);padding:20px;margin-bottom:12px;
+transition:var(--transition)
+}
+.rr-card:hover{border-color:var(--border-light)}
+.rr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rr-title{font-weight:600;font-size:0.95rem}
+.rr-status{font-size:0.72rem;padding:4px 10px;border-radius:10px;font-weight:600}
+.rr-status.pending{background:var(--yellow);color:#000}
+.rr-status.accepted,.rr-status.resolved{background:var(--green);color:#fff}
+.rr-status.rejected{background:var(--red);color:#fff}
+.rr-body{font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.5}
+.rr-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== USER LIST ===== */
+.user-item{
+display:flex;align-items:center;justify-content:space-between;
+padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-md);margin-bottom:8px;transition:var(--transition);
+flex-wrap:wrap;gap:12px
+}
+.user-item:hover{border-color:var(--border-light)}
+.user-item-info{display:flex;align-items:center;gap:12px}
+.user-item-av{
+width:36px;height:36px;border-radius:50%;background:var(--bg-tertiary);
+display:flex;align-items:center;justify-content:center;font-size:0.7rem;overflow:hidden
+}
+.user-item-av img{width:100%;height:100%;object-fit:cover}
+.user-item-name{font-weight:600;font-size:0.9rem}
+.user-item-email{font-size:0.73rem;color:var(--text-muted)}
+.user-item-role-text{font-size:0.7rem;color:var(--text-muted)}
+.user-item-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== BUTTONS ===== */
+.btn-sm{
+padding:7px 14px;border-radius:var(--radius-sm);font-size:0.78rem;
+font-weight:600;transition:var(--transition);display:inline-flex;
+align-items:center;gap:5px
+}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:var(--red-dark)}
+.btn-success{background:var(--green);color:#fff}
+.btn-success:hover{background:var(--green-dark)}
+.btn-outline{background:transparent;color:var(--text-secondary);border:1px solid var(--border-color)}
+.btn-outline:hover{background:var(--bg-hover)}
+.btn-primary{background:var(--text-primary);color:var(--bg-primary)}
+.btn-primary:hover{background:#e0e0e0}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-purple:hover{background:#9955ee}
+
+/* ===== MODALS ===== */
+.modal-overlay{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:6000;
+background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
+display:none;align-items:center;justify-content:center;padding:20px
+}
+.modal-overlay.active{display:flex}
+.modal{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-xl);padding:32px;position:relative;
+max-width:500px;width:100%;max-height:85vh;overflow-y:auto;
+animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:var(--shadow-xl)
+}
+.modal h3{font-size:1.1rem;margin-bottom:16px;font-weight:700}
+.modal-x{
+position:absolute;top:16px;right:16px;width:32px;height:32px;
+border-radius:50%;background:var(--bg-tertiary);
+display:flex;align-items:center;justify-content:center;transition:var(--transition)
+}
+.modal-x:hover{background:var(--bg-hover)}
+
+/* ===== BANNED SCREEN ===== */
+#banned-screen{
+position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;
+background:var(--bg-primary);display:none;flex-direction:column;
+align-items:center;justify-content:center;text-align:center;padding:40px
+}
+#banned-screen.active{display:flex}
+.ban-icon{font-size:4rem;margin-bottom:20px}
+.ban-title{font-size:1.5rem;font-weight:700;margin-bottom:8px}
+.ban-reason-display{color:var(--text-muted);margin-bottom:8px;font-size:0.9rem}
+.ban-duration-display{color:var(--red);font-weight:600;margin-bottom:24px}
+
+/* ===== TOAST ===== */
+.toast-box{position:fixed;top:80px;right:20px;z-index:7000;display:flex;flex-direction:column;gap:8px}
+.toast{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-md);padding:14px 20px;
+min-width:280px;max-width:360px;box-shadow:var(--shadow-lg);
+display:flex;align-items:center;gap:10px;
+animation:toastSlide 0.3s ease;font-size:0.85rem
+}
+@keyframes toastSlide{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+
+/* ===== NOTIF PANEL ===== */
+.notif-panel{
+position:fixed;top:64px;right:20px;width:320px;
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);
+z-index:5500;display:none;max-height:400px;overflow-y:auto
+}
+.notif-panel.show{display:block}
+.notif-panel-hd{padding:16px;border-bottom:1px solid var(--border-color);font-weight:700;font-size:0.9rem}
+.notif-item{
+padding:12px 16px;border-bottom:1px solid var(--border-color);
+font-size:0.8rem;transition:var(--transition);cursor:pointer
+}
+.notif-item:hover{background:var(--bg-hover)}
+.notif-item:last-child{border-bottom:none}
+.notif-item-t{font-weight:600;margin-bottom:2px}
+.notif-item-time{font-size:0.7rem;color:var(--text-muted)}
+.notif-empty{padding:32px;text-align:center;color:var(--text-muted);font-size:0.85rem}
+
+/* ===== FOOTER ===== */
+.footer{
+text-align:center;padding:32px 24px;border-top:1px solid var(--border-color);
+margin-top:40px;font-size:0.78rem;color:var(--text-muted)
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{
+text-align:center;padding:60px 20px;color:var(--text-muted);
+grid-column:1/-1
+}
+.empty-state i{font-size:2.5rem;margin-bottom:12px;display:block;opacity:0.4}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+.cards-grid,.store-grid{grid-template-columns:1fr}
+.chat-msg{max-width:90%}
+.page{padding:16px}
+.upload-card,.form-card{padding:20px}
+.hero{padding:32px 16px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- BLACK HOLE BG -->
+<div class="blackhole-bg">
+<div class="bh-ring"></div><div class="bh-ring"></div><div class="bh-ring"></div>
+<div class="bh-ring"></div><div class="bh-ring"></div><div class="bh-ring"></div>
+<div class="bh-core"></div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+<div class="loading-title">Perpus Impluse</div>
+<div class="loading-subtitle">Memakai system login Google untuk menggunakan chat system</div>
+<div class="loader-container">
+<div class="loader-ring"></div>
+<div class="loader-ring-inner"></div>
+<div class="loader-dot"></div>
+</div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+<div class="login-container">
+<div class="login-logo-text">🌀 Impluse</div>
+<div class="login-logo-sub">Prompt Vault Jailbreak</div>
+<button class="login-btn login-btn-google" id="btn-google">
+<i class="fab fa-google"></i> Masuk dengan Google
+</button>
+<div class="login-divider">atau</div>
+<button class="login-btn login-btn-guest" id="btn-guest">
+<i class="fas fa-user-secret"></i> Masuk sebagai Guest
+</button>
+<div class="login-note">
+<i class="fas fa-info-circle"></i>
+Guest tidak dapat mengakses fitur Chat Global. Login Google untuk pengalaman penuh.
+</div>
+</div>
+</div>
+
+<!-- BANNED SCREEN -->
+<div id="banned-screen">
+<div class="ban-icon">🚫</div>
+<div class="ban-title">Akun Anda Dibanned</div>
+<div class="ban-reason-display" id="ban-reason-txt"></div>
+<div class="ban-duration-display" id="ban-dur-txt"></div>
+<button class="login-btn login-btn-guest" onclick="doLogout()" style="max-width:220px;margin:0 auto">
+<i class="fas fa-sign-out-alt"></i> Logout
+</button>
+</div>
+
+<!-- WELCOME POPUP -->
+<div id="welcome-popup">
+<div class="welcome-card">
+<div class="welcome-img">
+<img src="https://i.ibb.co.com/Z6grYgPY/file-00000000a59471fa8d27bc833c770521.png" alt="Impluse" onerror="this.parentElement.innerHTML='<div style=&quot;font-size:3rem;padding-top:30px&quot;>🌀</div>'">
+</div>
+<div class="welcome-title">Selamat Datang</div>
+<div class="welcome-sub">Jelajahi koleksi prompt jailbreak terlengkap dan terkurasi</div>
+<button class="welcome-btn" id="btn-explore">🚀 Mulai Eksplorasi</button>
+<div class="welcome-copy">©2026-IMPLUSE-Jailbreak</div>
+</div>
+</div>
+
+<!-- COUNTDOWN -->
+<div id="countdown-overlay">
+<div class="cd-logo">
+<img src="https://i.ibb.co.com/Z6grYgPY/file-00000000a59471fa8d27bc833c770521.png" alt="Impluse" onerror="this.parentElement.innerHTML='<div style=&quot;font-size:2rem;padding-top:20px;text-align:center&quot;>🌀</div>'">
+</div>
+<div class="cd-number" id="cd-num">3</div>
+<div class="cd-text">Menyalin prompt...</div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-box" id="toast-box"></div>
+
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notif-panel">
+<div class="notif-panel-hd">Notifikasi</div>
+<div id="notif-list"><div class="notif-empty">Belum ada notifikasi</div></div>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div id="sidebar-overlay"></div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+<div class="sb-header">
+<span style="font-weight:700;font-size:0.95rem">Menu</span>
+<button class="sb-close" id="sb-close-btn"><i class="fas fa-times"></i></button>
+</div>
+<div class="sb-profile">
+<div class="sb-avatar" id="sb-avatar"><i class="fas fa-user"></i></div>
+<div class="sb-name" id="sb-name">Guest</div>
+<div class="sb-email" id="sb-email"></div>
+<span class="sb-role member" id="sb-role">Member</span>
+</div>
+<ul class="sb-menu">
+<li class="sb-section">Navigasi</li>
+<li><a href="#" onclick="nav('home');return false" class="active" data-p="home"><i class="fas fa-home"></i> Beranda</a></li>
+<li><a href="#" onclick="nav('store');return false" data-p="store"><i class="fas fa-store"></i> Store</a></li>
+<li class="sb-section">Member</li>
+<li><a href="#" onclick="nav('chat');return false" data-p="chat" id="menu-chat"><i class="fas fa-comments"></i> Chat Global</a></li>
+<li><a href="#" onclick="nav('request');return false" data-p="request"><i class="fas fa-paper-plane"></i> Request Jailbreak</a></li>
+<li class="sb-section" id="sec-admin" style="display:none">Admin / Owner</li>
+<li id="m-upload" style="display:none"><a href="#" onclick="nav('upload');return false" data-p="upload"><i class="fas fa-upload"></i> Upload</a></li>
+<li id="m-adminreq" style="display:none"><a href="#" onclick="nav('admin-requests');return false" data-p="admin-requests"><i class="fas fa-inbox"></i> Request Masuk</a></li>
+<li id="m-reports" style="display:none"><a href="#" onclick="nav('reports');return false" data-p="reports"><i class="fas fa-flag"></i> Laporan Produk</a></li>
+<li id="m-users" style="display:none"><a href="#" onclick="nav('users');return false" data-p="users"><i class="fas fa-users-cog"></i> Ban/Unban & Data</a></li>
+<li id="m-changer" style="display:none"><a href="#" onclick="nav('changer');return false" data-p="changer"><i class="fas fa-crown"></i> Role Changer</a></li>
+<li class="sb-section">Akun</li>
+<li><button onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+</ul>
+<div style="padding:16px;text-align:center;margin-top:20px">
+<div style="font-size:0.68rem;color:var(--text-muted)">©2026-Impluse-Vault</div>
+</div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div id="main-app">
+
+<nav class="navbar">
+<div class="nav-logo">
+<div class="nav-logo-icon">
+<img src="https://i.ibb.co.com/Z6grYgPY/file-00000000a59471fa8d27bc833c770521.png" alt="" onerror="this.parentElement.innerHTML='🌀'">
+</div>
+<span>Impluse</span>
+</div>
+<div class="nav-right">
+<div class="nav-icon-btn" id="btn-notif" onclick="toggleNotif()">
+<i class="fas fa-bell"></i>
+<span class="nav-badge" id="notif-badge">0</span>
+</div>
+<div class="nav-user" onclick="toggleSB()">
+<div class="nav-user-avatar" id="nav-av"><i class="fas fa-user"></i></div>
+<span id="nav-name">Guest</span>
+</div>
+<button class="nav-icon-btn" onclick="toggleSB()" style="display:none" id="hamburger-btn">
+<i class="fas fa-bars"></i>
+</button>
+</div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+<section class="hero">
+<div class="hero-logo">
+<img src="https://i.ibb.co.com/Z6grYgPY/file-00000000a59471fa8d27bc833c770521.png" alt="Impluse" onerror="this.parentElement.innerHTML='<div style=&quot;font-size:2.5rem;padding-top:25px;text-align:center&quot;>🌀</div>'">
+</div>
+<h1 class="hero-title">Prompt Vault Impluse</h1>
+<p class="hero-sub">Koleksi prompt jailbreak terlengkap dan terkurasi</p>
+<div class="hero-stats">
+<div class="hero-stat"><div class="hero-stat-num" id="stat-total">0</div><div class="hero-stat-label">Total Prompt</div></div>
+<div class="hero-stat"><div class="hero-stat-num" id="stat-cats">10</div><div class="hero-stat-label">Kategori</div></div>
+</div>
+</section>
+
+<section class="search-section">
+<div class="search-bar">
+<i class="fas fa-search"></i>
+<input type="text" id="search-inp" placeholder="Cari prompt..." oninput="doSearch()">
+<button class="search-go" onclick="doSearch()">Cari</button>
+</div>
+<div class="filter-row">
+<button class="filter-chip active" onclick="setFilter('all',this)">Semua</button>
+<button class="filter-chip" onclick="setFilter('ChatGPT',this)">ChatGPT</button>
+<button class="filter-chip" onclick="setFilter('Gemini',this)">Gemini</button>
+<button class="filter-chip" onclick="setFilter('DeepSeek',this)">DeepSeek</button>
+<button class="filter-chip" onclick="setFilter('Google AI',this)">Google AI</button>
+<button class="filter-chip" onclick="setFilter('Claude AI',this)">Claude AI</button>
+<button class="filter-chip" onclick="setFilter('Grok',this)">Grok</button>
+<button class="filter-chip" onclick="setFilter('Perplexity',this)">Perplexity</button>
+<button class="filter-chip" onclick="setFilter('QWEN',this)">QWEN</button>
+<button class="filter-chip" onclick="setFilter('KIMI',this)">KIMI</button>
+<select class="sort-select" id="sort-sel" onchange="doSort()">
+<option value="newest">Terbaru</option>
+<option value="oldest">Terlama</option>
+<option value="az">A-Z</option>
+<option value="za">Z-A</option>
+</select>
+</div>
+</section>
+
+<div class="cards-grid" id="cards"></div>
+<div class="pagination" id="pag"></div>
+</div>
+
+<!-- STORE PAGE -->
+<div class="page" id="page-store">
+<h2 style="font-family:var(--font-display);font-size:1.8rem;margin-bottom:6px">🏪 Store</h2>
+<p style="color:var(--text-muted);margin-bottom:24px;font-size:0.9rem">Produk & jasa premium dari owner dan admin</p>
+<div class="store-grid" id="store-grid"></div>
+</div>
+
+<!-- CHAT PAGE -->
+<div class="page" id="page-chat" style="padding-top:16px">
+<div id="chat-locked" class="chat-locked" style="display:none">
+<i class="fas fa-lock"></i>
+<p>Login dengan Google untuk mengakses Chat Global</p>
+</div>
+<div id="chat-main" style="display:none">
+<div class="chat-container">
+<div class="chat-top">
+<div class="chat-top-title"><span class="online-dot"></span> Chat Global</div>
+<div style="display:flex;gap:8px;align-items:center">
+<span style="font-size:0.78rem;color:var(--text-muted)" id="chat-count">0 online</span>
+<button class="btn-sm btn-outline" id="btn-announce-chat" style="display:none" onclick="openModal('modal-announce')"><i class="fas fa-bullhorn"></i></button>
+</div>
+</div>
+<div class="chat-announce" id="chat-announce"><i class="fas fa-bullhorn"></i><span id="announce-text"></span></div>
+<div class="chat-msgs" id="chat-msgs"></div>
+<div class="chat-input-row">
+<input type="text" id="chat-inp" placeholder="Ketik pesan..." maxlength="500" onkeydown="if(event.key==='Enter')sendMsg()">
+<button class="chat-send" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- REQUEST PAGE -->
+<div class="page" id="page-request">
+<div class="form-card">
+<h3>📝 Isi Request mu</h3>
+<div class="fg">
+<label>Jailbreak untuk apa?</label>
+<select id="req-target">
+<option value="">Pilih target AI...</option>
+<option>Claude</option><option>DeepSeek</option><option>Perplexity</option>
+<option>Dola</option><option>ChatGPT</option><option>Grok</option>
+<option>Google AI</option><option>Lainnya</option>
+</select>
+</div>
+<div class="fg"><label>Atau masukan kemauan mu</label><input id="req-custom" placeholder="Cth: DAN mode, Evil assistant..."></div>
+<div class="fg"><label>Kasih ide mu</label><input id="req-idea" placeholder="Cth: Fallen GPT"></div>
+<div class="fg"><label>Deskripsi request</label><textarea id="req-desc" placeholder="Jelaskan apa yang kamu inginkan..."></textarea></div>
+<button class="submit-btn" onclick="sendRequest()"><i class="fas fa-paper-plane"></i> Kirim Request</button>
+</div>
+</div>
+
+<!-- UPLOAD PAGE -->
+<div class="page" id="page-upload">
+<h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:20px">📤 Upload</h2>
+<div class="admin-tabs">
+<button class="admin-tab active" onclick="switchTab('tab-prompt',this)">Upload Prompt</button>
+<button class="admin-tab" onclick="switchTab('tab-store',this)">Upload Store Item</button>
+</div>
+<div class="admin-panel active" id="tab-prompt">
+<div class="upload-card">
+<h3>Upload Prompt Jailbreak</h3>
+<div class="fg"><label>Nama Jailbreak</label><input id="up-name" placeholder="Cth: Worm, DAN v12..."></div>
+<div class="fg"><label>Deskripsi</label><textarea id="up-desc" placeholder="AI ini bla-bla-bla..."></textarea></div>
+<div class="fg">
+<label>Jailbreak khusus untuk:</label>
+<div class="chk-group" id="up-cats">
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="ChatGPT">ChatGPT</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="Gemini">Gemini</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="DeepSeek">DeepSeek</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="Google AI">Google AI</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="Claude AI">Claude AI</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="Grok">Grok</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="Perplexity">Perplexity</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="QWEN">QWEN</label>
+<label class="chk-item" onclick="togChk(this)"><input type="checkbox" value="KIMI">KIMI</label>
+</div>
+</div>
+<div class="fg"><label>Prompt (Wajib - tanpa batas karakter)</label><textarea id="up-prompt" placeholder="Masukkan prompt jailbreak..." style="min-height:220px"></textarea></div>
+<button class="submit-btn" onclick="uploadPrompt()"><i class="fas fa-upload"></i> Upload Prompt</button>
+</div>
+</div>
+<div class="admin-panel" id="tab-store">
+<div class="upload-card">
+<h3>Upload Store Item</h3>
+<div class="fg"><label>Nama Item</label><input id="st-name" placeholder="Cth: Jasa A-B"></div>
+<div class="fg"><label>Harga (Rp)</label><input type="number" id="st-price" placeholder="Cth: 10000"></div>
+<div class="fg"><label>Deskripsi</label><textarea id="st-desc" placeholder="Deskripsi produk..."></textarea></div>
+<div class="fg"><label>Catatan</label><textarea id="st-note" placeholder="Pembayaran harus dilakukan di WhatsApp..."></textarea></div>
+<div class="fg"><label>Link WhatsApp</label><input id="st-wa" placeholder="Cth: https://wa.me/62888..."></div>
+<div class="fg">
+<label>Gambar Produk</label>
+<div class="file-upload" onclick="document.getElementById('st-img-inp').click()">
+<i class="fas fa-cloud-upload-alt"></i>
+<p>Klik untuk upload gambar (maks 2MB)</p>
+<p id="st-img-name" style="color:var(--green);margin-top:4px;font-size:0.8rem"></p>
+<input type="file" id="st-img-inp" accept="image/*" onchange="handleImg(this)">
+</div>
+</div>
+<button class="submit-btn" onclick="uploadStore()"><i class="fas fa-upload"></i> Upload Item</button>
+</div>
+</div>
+</div>
+
+<!-- ADMIN REQUESTS -->
+<div class="page" id="page-admin-requests">
+<h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:20px">📥 Request Masuk</h2>
+<div id="admin-req-list"></div>
+</div>
+
+<!-- REPORTS -->
+<div class="page" id="page-reports">
+<h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:20px">🚩 Laporan Produk</h2>
+<div id="reports-list"></div>
+</div>
+
+<!-- USERS -->
+<div class="page" id="page-users">
+<h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:20px">👥 Data User & Ban/Unban</h2>
+<div class="search-bar" style="margin-bottom:20px">
+<i class="fas fa-search"></i>
+<input type="text" id="user-search-inp" placeholder="Cari user..." oninput="searchUser()">
+</div>
+<div id="users-list"></div>
+</div>
+
+<!-- CHANGER -->
+<div class="page" id="page-changer">
+<h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:8px">👑 Role Changer</h2>
+<p style="color:var(--text-muted);margin-bottom:20px;font-size:0.88rem">Ubah role member menjadi admin atau sebaliknya</p>
+<div class="search-bar" style="margin-bottom:20px">
+<i class="fas fa-search"></i>
+<input type="text" id="changer-search-inp" placeholder="Cari user..." oninput="searchChanger()">
+</div>
+<div id="changer-list"></div>
+</div>
+
+<footer class="footer">©2026-Impluse-Vault | Prompt Vault Jailbreak</footer>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Report Modal -->
+<div class="modal-overlay" id="modal-report">
+<div class="modal">
+<button class="modal-x" onclick="closeModal('modal-report')"><i class="fas fa-times"></i></button>
+<h3>🚩 Laporkan Produk</h3>
+<input type="hidden" id="rp-pid">
+<div class="fg"><label>Alasan pelaporan</label><textarea id="rp-reason" placeholder="Jelaskan alasan kamu melapor..."></textarea></div>
+<div class="fg"><label>Sertakan nomor WhatsApp mu agar bisa dihubungi pihak owner!</label><input id="rp-wa" placeholder="08xxx..."></div>
+<button class="submit-btn" onclick="submitReport()">Kirim Laporan</button>
+</div>
+</div>
+
+<!-- Ban Modal -->
+<div class="modal-overlay" id="modal-ban">
+<div class="modal">
+<button class="modal-x" onclick="closeModal('modal-ban')"><i class="fas fa-times"></i></button>
+<h3>🔨 Ban User</h3>
+<input type="hidden" id="ban-uid">
+<div id="ban-uname" style="font-weight:600;margin-bottom:16px"></div>
+<div class="fg"><label>Durasi ban (hari)</label><input type="number" id="ban-days" placeholder="Cth: 7" min="1"></div>
+<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="ban-perm" onchange="document.getElementById('ban-days').disabled=this.checked"> Permanen</label></div>
+<div class="fg"><label>Alasan ban</label><textarea id="ban-reason-inp" placeholder="Alasan..."></textarea></div>
+<button class="submit-btn" style="background:var(--red)" onclick="doBan()"><i class="fas fa-gavel"></i> Ban User</button>
+</div>
+</div>
+
+<!-- Request Response Modal -->
+<div class="modal-overlay" id="modal-reqresp">
+<div class="modal">
+<button class="modal-x" onclick="closeModal('modal-reqresp')"><i class="fas fa-times"></i></button>
+<h3>Tanggapi Request</h3>
+<input type="hidden" id="rr-id">
+<div id="rr-detail" style="margin-bottom:16px;padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:0.85rem;line-height:1.6"></div>
+<p style="margin-bottom:12px;font-size:0.9rem">Apakah anda menerima request ini?</p>
+<div class="fg"><label>Sertakan alasan</label><textarea id="rr-reason" placeholder="Alasan..."></textarea></div>
+<div style="display:flex;gap:8px">
+<button class="submit-btn btn-success" style="background:var(--green)" onclick="respondReq(true)"><i class="fas fa-check"></i> Ya, Terima</button>
+<button class="submit-btn" style="background:var(--red)" onclick="respondReq(false)"><i class="fas fa-times"></i> Tidak</button>
+</div>
+</div>
+</div>
+
+<!-- Announcement Modal -->
+<div class="modal-overlay" id="modal-announce">
+<div class="modal">
+<button class="modal-x" onclick="closeModal('modal-announce')"><i class="fas fa-times"></i></button>
+<h3>📢 Buat Pengumuman</h3>
+<div class="fg"><label>Isi Pengumuman</label><textarea id="announce-inp" placeholder="Tulis pengumuman..."></textarea></div>
+<button class="submit-btn" onclick="postAnnounce()">Posting Pengumuman</button>
+</div>
+</div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+// ========== CONFIG ==========
+const SB_URL='https://pmnmqyoovymetfivwdhx.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtbm1xeW9vdnltZXRmaXZ3ZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MzczNzEsImV4cCI6MjA5ODIxMzM3MX0.XzXJr2WBO3sJc1Dm6IZX_OFFevsS3_TMxyLCUyQJn_Y';
+const OWNER_EMAIL='antengFritzG@gmail.com';
+const PER_PAGE=9;
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+
+// ========== STATE ==========
+let me=null,role='member',guest=false;
+let filter='all',sort='newest',pg=1;
+let prompts=[],storeItems=[],users=[];
+let chSub=null,rtSub=null;
+
+// ========== UTILS ==========
+const $=id=>document.getElementById(id);
+const esc=(s)=>{if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+const clean=(s,m=1000)=>s?String(s).substring(0,m).replace(/<[^>]*>/g,'').trim():'';
+
+const rl={c:{},ok(a,m=30){const n=Date.now();if(!this.c[a])this.c[a]=[];this.c[a]=this.c[a].filter(t=>n-t<60000);if(this.c[a].length>=m)return false;this.c[a].push(n);return true}};
+
+function toast(msg,type='info'){
+const b=$('toast-box'),t=document.createElement('div');
+t.className='toast '+type;
+const ic={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'};
+t.innerHTML=`<i class="fas ${ic[type]||ic.info}"></i><span>${esc(msg)}</span>`;
+b.appendChild(t);
+setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(60px)';setTimeout(()=>t.remove(),300)},3500);
+}
+
+function openModal(id){$(id).classList.add('active')}
+function closeModal(id){$(id).classList.remove('active')}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('active')}));
+
+// ========== LOADING ==========
+window.addEventListener('load',async()=>{
+setTimeout(async()=>{
+$('loading-screen').classList.add('fade-out');
+setTimeout(async()=>{
+$('loading-screen').style.display='none';
+const{data:{session}}=await sb.auth.getSession();
+if(session){await authUser(session.user)}
+else{
+const g=localStorage.getItem('impluse_guest');
+if(g){guest=true;me=JSON.parse(g);role='member';await enter()}
+else{$('login-screen').classList.add('active')}
+}
+},600);
+},2800);
+});
+
+// ========== AUTH ==========
+$('btn-google').onclick=async()=>{
+try{
+const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+if(error)throw error;
+}catch(e){toast('Gagal login: '+e.message,'error')}
+};
+
+$('btn-guest').onclick=()=>{
+const g={id:'guest_'+Math.random().toString(36).substr(2,9),email:null,user_metadata:{full_name:'Guest',avatar_url:null}};
+localStorage.setItem('impluse_guest',JSON.stringify(g));
+guest=true;me=g;role='member';enter();
+};
+
+sb.auth.onAuthStateChange(async(ev,session)=>{if(ev==='SIGNED_IN'&&session)await authUser(session.user)});
+
+async function authUser(user){
+me=user;guest=false;
+try{
+const{data:ex}=await sb.from('users').select('*').eq('id',user.id).single();
+if(!ex){
+await sb.from('users').insert({id:user.id,email:user.email,name:user.user_metadata?.full_name||user.email?.split('@')[0]||'User',avatar_url:user.user_metadata?.avatar_url||null,role:user.email===OWNER_EMAIL?'owner':'member',banned:false,created_at:new Date().toISOString()});
+role=user.email===OWNER_EMAIL?'owner':'member';
+}else{
+if(ex.banned){
+if(ex.ban_until&&new Date(ex.ban_until)<new Date()){
+await sb.from('users').update({banned:false,ban_reason:null,ban_until:null}).eq('id',user.id);
+role=ex.role;
+}else{showBanned(ex);return}
+}else{role=ex.role}
+await sb.from('users').update({name:user.user_metadata?.full_name||ex.name,avatar_url:user.user_metadata?.avatar_url||ex.avatar_url}).eq('id',user.id);
+}
+}catch(e){console.error(e);role=user.email===OWNER_EMAIL?'owner':'member'}
+await enter();
+}
+
+function showBanned(u){
+$('login-screen').classList.remove('active');
+$('banned-screen').classList.add('active');
+$('ban-reason-txt').textContent='Alasan: '+(u.ban_reason||'Tidak ada alasan');
+$('ban-dur-txt').textContent=u.ban_until?'Banned sampai: '+new Date(u.ban_until).toLocaleDateString('id-ID',{dateStyle:'full'}):'Banned: PERMANEN';
+}
+
+async function doLogout(){
+if(chSub)sb.removeChannel(chSub);
+if(rtSub)sb.removeChannel(rtSub);
+if(guest)localStorage.removeItem('impluse_guest');
+else await sb.auth.signOut();
+me=null;guest=false;role='member';
+$('main-app').classList.remove('active');
+$('banned-screen').classList.remove('active');
+$('welcome-popup').classList.remove('active');
+$('login-screen').classList.add('active');
+}
+window.doLogout=doLogout;
+
+// ========== ENTER APP ==========
+async function enter(){
+$('login-screen').classList.remove('active');
+updateUI();setupMenu();
+const w=sessionStorage.getItem('impluse_w');
+if(!w){
+$('welcome-popup').classList.add('active');
+$('btn-explore').onclick=()=>{$('welcome-popup').classList.remove('active');$('main-app').classList.add('active');sessionStorage.setItem('impluse_w','1')};
+}else{$('main-app').classList.add('active')}
+await Promise.all([loadPrompts(),loadStore()]);
+setupRT();
+}
+
+function updateUI(){
+const n=me?.user_metadata?.full_name||me?.email?.split('@')[0]||'Guest';
+const av=me?.user_metadata?.avatar_url;
+const em=me?.email||'';
+$('nav-name').textContent=n;$('sb-name').textContent=n;$('sb-email').textContent=em;
+const r=$('sb-role');r.textContent=role.charAt(0).toUpperCase()+role.slice(1);r.className='sb-role '+role;
+if(av){$('nav-av').innerHTML=`<img src="${av}">`;$('sb-avatar').innerHTML=`<img src="${av}">`}
+}
+
+function setupMenu(){
+const isO=role==='owner',isA=role==='admin'||isO;
+$('sec-admin').style.display=isA?'':'none';
+$('m-upload').style.display=isA?'':'none';
+$('m-adminreq').style.display=isA?'':'none';
+$('m-reports').style.display=isO?'':'none';
+$('m-users').style.display=isO?'':'none';
+$('m-changer').style.display=isO?'':'none';
+}
+
+// ========== NAV ==========
+function nav(p){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.querySelectorAll('.sb-menu a').forEach(a=>a.classList.remove('active'));
+const t=$('page-'+p);if(t)t.classList.add('active');
+const l=document.querySelector(`.sb-menu a[data-p="${p}"]`);if(l)l.classList.add('active');
+closeSB();
+if(p==='chat')initChat();
+if(p==='admin-requests')loadAdminReqs();
+if(p==='reports')loadReports();
+if(p==='users')loadUsers();
+if(p==='changer')loadChanger();
+}
+window.nav=nav;
+
+function toggleSB(){$('sidebar').classList.toggle('open');$('sidebar-overlay').classList.toggle('active')}
+function closeSB(){$('sidebar').classList.remove('open');$('sidebar-overlay').classList.remove('active')}
+$('sb-close-btn').onclick=closeSB;
+$('sidebar-overlay').onclick=closeSB;
+
+let notifOpen=false;
+function toggleNotif(){notifOpen=!notifOpen;$('notif-panel').classList.toggle('show',notifOpen)}
+window.toggleNotif=toggleNotif;
+document.addEventListener('click',e=>{if(!e.target.closest('#btn-notif')&&!e.target.closest('#notif-panel')){$('notif-panel').classList.remove('show');notifOpen=false}});
+
+// ========== PROMPTS ==========
+async function loadPrompts(){
+try{
+const{data,error}=await sb.from('prompts').select('*').order('created_at',{ascending:false});
+if(error)throw error;
+prompts=data||[];
+$('stat-total').textContent=prompts.length;
+render();
+}catch(e){console.error(e);prompts=[];render()}
+}
+
+function render(){
+let f=[...prompts];
+if(filter!=='all')f=f.filter(p=>(p.categories||[]).includes(filter));
+const q=($('search-inp')?.value||'').toLowerCase();
+if(q)f=f.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)||(p.prompt||'').toLowerCase().includes(q));
+switch(sort){
+case'newest':f.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));break;
+case'oldest':f.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));break;
+case'az':f.sort((a,b)=>(a.name||'').localeCompare(b.name||''));break;
+case'za':f.sort((a,b)=>(b.name||'').localeCompare(a.name||''));break;
+}
+const total=f.length,tp=Math.max(1,Math.ceil(total/PER_PAGE));
+if(pg>tp)pg=tp;
+const s=(pg-1)*PER_PAGE,paged=f.slice(s,s+PER_PAGE);
+const g=$('cards');
+if(!paged.length){g.innerHTML='<div class="empty-state"><i class="fas fa-search"></i><p>Tidak ada prompt ditemukan</p></div>';$('pag').innerHTML='';return}
+g.innerHTML=paged.map(p=>{
+const cats=(p.categories||[]).join(', ')||'Umum';
+const cc=(p.prompt||'').length;
+const dt=new Date(p.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+return`<div class="card">
+<div class="card-header"><div class="card-title">${esc(p.name)}</div><span class="card-badge">${esc(cats)}</span></div>
+<div class="card-meta"><span><i class="fas fa-user"></i> ${esc(p.creator||'Admin')}</span><span><i class="fas fa-calendar"></i> ${dt}</span></div>
+<div class="card-desc">${esc(p.description||'Tidak ada deskripsi')}</div>
+<div class="card-footer">
+<span class="card-chars"><i class="fas fa-text-width"></i> ${cc.toLocaleString()} karakter</span>
+<div class="card-actions">
+<button class="card-btn card-btn-copy" onclick="copyP('${p.id}')"><i class="fas fa-copy"></i> Copy</button>
+<button class="card-btn card-btn-dl" onclick="dlP('${p.id}')"><i class="fas fa-download"></i></button>
+</div></div></div>`}).join('');
+renderPag(tp);
+}
+
+function renderPag(tp){
+const p=$('pag');if(tp<=1){p.innerHTML='';return}
+let h='';
+if(pg>1)h+=`<button class="pg-btn" onclick="goP(${pg-1})"><i class="fas fa-chevron-left"></i></button>`;
+const s=Math.max(1,pg-2),e=Math.min(tp,s+4);
+for(let i=s;i<=e;i++)h+=`<button class="pg-btn ${i===pg?'active':''}" onclick="goP(${i})">${i}</button>`;
+if(pg<tp)h+=`<button class="pg-btn" onclick="goP(${pg+1})"><i class="fas fa-chevron-right"></i></button>`;
+p.innerHTML=h;
+}
+function goP(n){pg=n;render();window.scrollTo({top:400,behavior:'smooth'})}
+window.goP=goP;
+function doSearch(){pg=1;render()}
+window.doSearch=doSearch;
+function setFilter(f2,el){filter=f2;pg=1;document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');render()}
+window.setFilter=setFilter;
+function doSort(){sort=$('sort-sel').value;pg=1;render()}
+window.doSort=doSort;
+
+// ========== COUNTDOWN ==========
+function countdown(cb){
+const ov=$('countdown-overlay'),nm=$('cd-num');
+ov.classList.add('active');
+try{
+const ac=new(window.AudioContext||window.webkitAudioContext)();
+const beep=(f,d)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=f;o.type='sine';g.gain.value=0.08;o.start();o.stop(ac.currentTime+d)};
+beep(440,0.12);setTimeout(()=>beep(440,0.12),1000);setTimeout(()=>beep(440,0.12),2000);setTimeout(()=>beep(880,0.25),3000);
+}catch(e){}
+let c=3;nm.textContent=c;
+const iv=setInterval(()=>{c--;if(c>0){nm.textContent=c}else{clearInterval(iv);nm.textContent='✓';setTimeout(()=>{ov.classList.remove('active');nm.textContent='3';cb()},400)}},1000);
+}
+
+function copyP(id){
+if(!rl.ok('copy',10)){toast('Terlalu cepat, tunggu sebentar','error');return}
+const p=prompts.find(x=>x.id===id);if(!p)return;
+countdown(()=>{
+navigator.clipboard.writeText(p.prompt).then(()=>toast('Prompt berhasil disalin!','success')).catch(()=>{
+const ta=document.createElement('textarea');ta.value=p.prompt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('Prompt berhasil disalin!','success')});
+});
+}
+window.copyP=copyP;
+
+function dlP(id){
+if(!rl.ok('dl',10)){toast('Terlalu cepat','error');return}
+const p=prompts.find(x=>x.id===id);if(!p)return;
+countdown(()=>{
+const b=new Blob([p.prompt],{type:'text/plain'});const u=URL.createObjectURL(b);
+const a=document.createElement('a');a.href=u;a.download=(p.name||'prompt')+'.txt';a.click();URL.revokeObjectURL(u);
+toast('Prompt berhasil didownload!','success');
+});
+}
+window.dlP=dlP;
+
+// ========== STORE ==========
+async function loadStore(){
+try{
+const{data}=await sb.from('store_items').select('*').eq('blocked',false).order('created_at',{ascending:false});
+storeItems=data||[];renderStore();
+}catch(e){storeItems=[];renderStore()}
+}
+
+function renderStore(){
+const g=$('store-grid');
+if(!storeItems.length){g.innerHTML='<div class="empty-state"><i class="fas fa-store-slash"></i><p>Belum ada produk di store</p></div>';return}
+g.innerHTML=storeItems.map(i=>`
+<div class="store-card">
+<div class="store-card-img">${i.image_url?`<img src="${esc(i.image_url)}" alt="${esc(i.name)}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i>'">`:'<i class="fas fa-image"></i>'}</div>
+<div class="store-card-body">
+<div class="store-card-name">${esc(i.name)}</div>
+<div class="store-card-price">Rp ${Number(i.price||0).toLocaleString('id-ID')}</div>
+<div class="store-card-desc">${esc(i.description||'')}</div>
+${i.note?`<div style="font-size:0.73rem;color:var(--yellow);margin-bottom:12px"><i class="fas fa-info-circle"></i> ${esc(i.note)}</div>`:''}
+<div class="store-card-actions">
+<a href="${esc(i.wa_link||'#')}" target="_blank" class="store-btn store-btn-buy"><i class="fab fa-whatsapp"></i> Hubungi Penjual</a>
+<button class="store-btn store-btn-report" onclick="openReport('${i.id}')"><i class="fas fa-flag"></i></button>
+</div></div></div>`).join('');
+}
+
+// ========== CHAT ==========
+function initChat(){
+if(guest){$('chat-locked').style.display='block';$('chat-main').style.display='none';return}
+$('chat-locked').style.display='none';$('chat-main').style.display='block';
+if(role==='owner')$('btn-announce-chat').style.display='';
+loadAnnounce();loadMsgs();subChat();
+}
+
+async function loadAnnounce(){
+try{const{data}=await sb.from('announcements').select('*').order('created_at',{ascending:false}).limit(1).single();
+if(data){$('announce-text').textContent=data.content;$('chat-announce').classList.add('show')}}catch(e){}}
+
+async function loadMsgs(){
+try{const{data}=await sb.from('chat_messages').select('*').order('created_at',{ascending:true}).limit(100);
+const c=$('chat-msgs');c.innerHTML='';(data||[]).forEach(m=>appendMsg(m));c.scrollTop=c.scrollHeight}catch(e){console.error(e)}}
+
+function appendMsg(m){
+const c=$('chat-msgs'),own=me&&m.user_id===me.id;
+const t=new Date(m.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+const d=document.createElement('div');d.className='chat-msg'+(own?' own':'');d.id='m-'+m.id;
+d.innerHTML=`<div class="chat-msg-av">${m.avatar_url?`<img src="${m.avatar_url}">`:'<i class="fas fa-user"></i>'}</div>
+<div class="chat-msg-body"><div class="chat-msg-name">${esc(m.user_name||'User')}</div>
+<div class="chat-msg-text">${esc(m.content)}</div><div class="chat-msg-time">${t}</div>
+<div class="chat-msg-acts"><button class="chat-msg-act" onclick="cpTxt(this)" data-t="${esc(m.content).replace(/"/g,'&quot;')}"><i class="fas fa-copy"></i></button>
+${own||role==='owner'?`<button class="chat-msg-act" onclick="delMsg('${m.id}')"><i class="fas fa-trash"></i></button>`:''}</div></div>`;
+c.appendChild(d);
+}
+
+function subChat(){
+if(chSub)sb.removeChannel(chSub);
+chSub=sb.channel('chat-rt')
+.on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},p=>{appendMsg(p.new);const c=$('chat-msgs');c.scrollTop=c.scrollHeight})
+.on('postgres_changes',{event:'DELETE',schema:'public',table:'chat_messages'},p=>{const e=$('m-'+p.old.id);if(e)e.remove()})
+.subscribe();
+}
+
+async function sendMsg(){
+if(guest){toast('Login Google untuk chat','error');return}
+if(!rl.ok('chat',20)){toast('Terlalu cepat','error');return}
+const inp=$('chat-inp'),c=clean(inp.value,500);if(!c)return;inp.value='';
+try{await sb.from('chat_messages').insert({user_id:me.id,user_name:me.user_metadata?.full_name||me.email?.split('@')[0]||'User',avatar_url:me.user_metadata?.avatar_url||null,content:c})}
+catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.sendMsg=sendMsg;
+
+function cpTxt(btn){navigator.clipboard.writeText(btn.dataset.t).then(()=>toast('Disalin!','success'))}
+window.cpTxt=cpTxt;
+
+async function delMsg(id){try{await sb.from('chat_messages').delete().eq('id',id);toast('Dihapus','success')}catch(e){toast('Gagal','error')}}
+window.delMsg=delMsg;
+
+async function postAnnounce(){
+if(role!=='owner')return;
+const c=clean($('announce-inp').value,500);if(!c){toast('Isi pengumuman','error');return}
+try{await sb.from('announcements').insert({content:c,created_by:me.id});
+$('announce-text').textContent=c;$('chat-announce').classList.add('show');
+closeModal('modal-announce');$('announce-inp').value='';toast('Pengumuman diposting!','success');
+addNotif('Pengumuman Baru',c)}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.postAnnounce=postAnnounce;
+
+// ========== REQUEST ==========
+async function sendRequest(){
+if(!rl.ok('req',5)){toast('Terlalu cepat','error');return}
+const t=$('req-target').value,cu=clean($('req-custom').value,200),idea=clean($('req-idea').value,200),desc=clean($('req-desc').value,1000);
+if(!t&&!cu){toast('Pilih target AI atau masukkan kemauan','error');return}
+if(!desc){toast('Masukkan deskripsi','error');return}
+try{await sb.from('requests').insert({user_id:me.id,user_name:me.user_metadata?.full_name||me.email?.split('@')[0]||'Guest',target_ai:t||cu,idea,description:desc,status:'pending'});
+toast('Request berhasil dikirim!','success');$('req-target').value='';$('req-custom').value='';$('req-idea').value='';$('req-desc').value=''}
+catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.sendRequest=sendRequest;
+
+// ========== UPLOAD PROMPT ==========
+function togChk(el){el.classList.toggle('checked');const cb=el.querySelector('input');cb.checked=!cb.checked}
+window.togChk=togChk;
+function switchTab(id,btn){document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));$(id).classList.add('active');btn.classList.add('active')}
+window.switchTab=switchTab;
+
+async function uploadPrompt(){
+if(role!=='admin'&&role!=='owner'){toast('Unauthorized','error');return}
+if(!rl.ok('upload',10)){toast('Terlalu cepat','error');return}
+const nm=clean($('up-name').value,200),desc=clean($('up-desc').value,2000),pr=$('up-prompt').value.trim();
+const cats=Array.from(document.querySelectorAll('#up-cats input:checked')).map(c=>c.value);
+if(!nm){toast('Masukkan nama','error');return}
+if(!pr){toast('Prompt wajib','error');return}
+if(!cats.length){toast('Pilih minimal 1 kategori','error');return}
+try{const{error}=await sb.from('prompts').insert({name:nm,description:desc,prompt:pr,categories:cats,creator:me.user_metadata?.full_name||me.email?.split('@')[0]||'Admin',created_by:me.id});
+if(error)throw error;toast('Prompt berhasil diupload!','success');
+$('up-name').value='';$('up-desc').value='';$('up-prompt').value='';
+document.querySelectorAll('#up-cats .chk-item').forEach(x=>{x.classList.remove('checked');x.querySelector('input').checked=false});
+await loadPrompts()}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.uploadPrompt=uploadPrompt;
+
+// ========== UPLOAD STORE ==========
+let stImg=null;
+function handleImg(inp){
+const f=inp.files[0];if(!f)return;
+if(f.size>2*1024*1024){toast('Gambar maks 2MB','error');return}
+$('st-img-name').textContent=f.name;
+const r=new FileReader();r.onload=e=>{stImg=e.target.result};r.readAsDataURL(f);
+}
+window.handleImg=handleImg;
+
+async function uploadStore(){
+if(role!=='admin'&&role!=='owner'){toast('Unauthorized','error');return}
+if(!rl.ok('upload',10)){toast('Terlalu cepat','error');return}
+const nm=clean($('st-name').value,200),pr=parseInt($('st-price').value)||0,desc=clean($('st-desc').value,2000),
+note=clean($('st-note').value,500),wa=clean($('st-wa').value,200);
+if(!nm){toast('Masukkan nama item','error');return}
+if(!pr){toast('Masukkan harga','error');return}
+let imgUrl=null;
+if(stImg){
+try{
+const fn='store_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg';
+const b64=stImg.split(',')[1];const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+const{data:ud,error:ue}=await sb.storage.from('store-images').upload(fn,bytes,{contentType:'image/jpeg',upsert:true});
+if(ue){imgUrl=stImg}else{const{data:pu}=sb.storage.from('store-images').getPublicUrl(fn);imgUrl=pu.publicUrl}
+}catch(e){imgUrl=stImg}
+}
+try{const{error}=await sb.from('store_items').insert({name:nm,price:pr,description:desc,note,wa_link:wa,image_url:imgUrl,blocked:false,seller_id:me.id,seller_name:me.user_metadata?.full_name||me.email?.split('@')[0]||'Admin'});
+if(error)throw error;toast('Item berhasil diupload!','success');
+$('st-name').value='';$('st-price').value='';$('st-desc').value='';$('st-note').value='';$('st-wa').value='';$('st-img-name').textContent='';stImg=null;
+await loadStore()}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.uploadStore=uploadStore;
+
+// ========== REPORT ==========
+function openReport(pid){$('rp-pid').value=pid;openModal('modal-report')}
+window.openReport=openReport;
+
+async function submitReport(){
+if(!rl.ok('report',5)){toast('Terlalu cepat','error');return}
+const pid=$('rp-pid').value,reason=clean($('rp-reason').value,1000),wa=clean($('rp-wa').value,50);
+if(!reason){toast('Masukkan alasan','error');return}
+if(!wa){toast('Masukkan nomor WhatsApp','error');return}
+try{await sb.from('reports').insert({product_id:pid,reporter_id:me.id,reporter_name:me.user_metadata?.full_name||'User',reason,wa_number:wa,status:'pending'});
+toast('Laporan dikirim!','success');closeModal('modal-report');$('rp-reason').value='';$('rp-wa').value=''}
+catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.submitReport=submitReport;
+
+// ========== ADMIN: REPORTS ==========
+async function loadReports(){
+if(role!=='owner')return;
+try{const{data}=await sb.from('reports').select('*, store_items(name, image_url)').order('created_at',{ascending:false});
+const l=$('reports-list');
+if(!data||!data.length){l.innerHTML='<div class="empty-state"><i class="fas fa-flag"></i><p>Belum ada laporan</p></div>';return}
+l.innerHTML=data.map(r=>`<div class="rr-card">
+<div class="rr-header"><span class="rr-title">Produk: ${esc(r.store_items?.name||'Unknown')}</span><span class="rr-status ${r.status}">${r.status}</span></div>
+${r.store_items?.image_url?`<img src="${r.store_items.image_url}" style="width:100px;height:60px;object-fit:cover;border-radius:8px;margin-bottom:8px" onerror="this.style.display='none'">`:''}
+<div class="rr-body"><strong>Alasan:</strong> ${esc(r.reason)}<br><strong>Pelapor:</strong> ${esc(r.reporter_name)} | WA: ${esc(r.wa_number)}</div>
+<div class="rr-actions">
+<button class="btn-sm btn-outline" onclick="nav('store')"><i class="fas fa-eye"></i> Cek Barang</button>
+<button class="btn-sm btn-danger" onclick="blockItem('${r.product_id}','${r.id}')"><i class="fas fa-ban"></i> Blokir Barang</button>
+</div></div>`).join('')}catch(e){console.error(e)}
+}
+
+async function blockItem(pid,rid){
+try{await sb.from('store_items').update({blocked:true}).eq('id',pid);
+await sb.from('reports').update({status:'resolved'}).eq('id',rid);
+toast('Produk diblokir!','success');await Promise.all([loadStore(),loadReports()])}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.blockItem=blockItem;
+
+// ========== ADMIN: REQUESTS ==========
+async function loadAdminReqs(){
+if(role!=='admin'&&role!=='owner')return;
+try{const{data}=await sb.from('requests').select('*').order('created_at',{ascending:false});
+const l=$('admin-req-list');
+if(!data||!data.length){l.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i><p>Belum ada request</p></div>';return}
+l.innerHTML=data.map(r=>`<div class="rr-card" style="cursor:pointer" onclick="openReqResp('${r.id}',\`${esc(r.user_name)}\`,\`${esc(r.target_ai)}\`,\`${esc(r.idea||'')}\`,\`${esc(r.description)}\`,'${r.status}')">
+<div class="rr-header"><span class="rr-title">${esc(r.user_name)} - ${esc(r.target_ai)}</span><span class="rr-status ${r.status}">${r.status}</span></div>
+<div class="rr-body"><strong>Ide:</strong> ${esc(r.idea||'-')}<br>${esc(r.description)}</div></div>`).join('')}catch(e){console.error(e)}
+}
+
+function openReqResp(id,name,target,idea,desc,status){
+if(status!=='pending'){toast('Request sudah ditanggapi','info');return}
+$('rr-id').value=id;$('rr-detail').innerHTML=`<strong>${name}</strong> - ${target}<br><strong>Ide:</strong> ${idea}<br>${desc}`;
+openModal('modal-reqresp');
+}
+window.openReqResp=openReqResp;
+
+async function respondReq(acc){
+const id=$('rr-id').value,reason=clean($('rr-reason').value,500);
+try{await sb.from('requests').update({status:acc?'accepted':'rejected',response_reason:reason,responded_by:me.id}).eq('id',id);
+toast(acc?'Request diterima!':'Request ditolak',acc?'success':'info');closeModal('modal-reqresp');$('rr-reason').value='';await loadAdminReqs()}
+catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.respondReq=respondReq;
+
+// ========== USERS / BAN ==========
+async function loadUsers(){
+if(role!=='owner')return;
+try{const{data}=await sb.from('users').select('*').order('created_at',{ascending:false});
+users=data||[];renderUsers(users)}catch(e){console.error(e)}
+}
+
+function searchUser(){
+const q=$('user-search-inp').value.toLowerCase();
+renderUsers(users.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
+}
+window.searchUser=searchUser;
+
+function renderUsers(list){
+const l=$('users-list');
+if(!list.length){l.innerHTML='<div class="empty-state"><i class="fas fa-users"></i><p>Tidak ada user</p></div>';return}
+l.innerHTML=list.map(u=>`<div class="user-item">
+<div class="user-item-info"><div class="user-item-av">${u.avatar_url?`<img src="${u.avatar_url}">`:'<i class="fas fa-user"></i>'}</div>
+<div><div class="user-item-name">${esc(u.name)} ${u.banned?'🚫':''}</div>
+<div class="user-item-email">${esc(u.email||'Guest')}</div>
+<div class="user-item-role-text">${u.role}${u.banned?' | BANNED'+(u.ban_until?' sampai '+new Date(u.ban_until).toLocaleDateString('id-ID'):' PERMANEN'):''}</div></div></div>
+<div class="user-item-actions">
+${!u.banned?`<button class="btn-sm btn-danger" onclick="openBan('${u.id}','${esc(u.name).replace(/'/g,"\\'")}')"><i class="fas fa-gavel"></i> Ban</button>`:`<button class="btn-sm btn-success" onclick="doUnban('${u.id}')"><i class="fas fa-unlock"></i> Unban</button>`}
+</div></div>`).join('');
+}
+
+function openBan(uid,uname){
+$('ban-uid').value=uid;$('ban-uname').textContent='User: '+uname;
+$('ban-days').value='';$('ban-reason-inp').value='';$('ban-perm').checked=false;$('ban-days').disabled=false;
+openModal('modal-ban');
+}
+window.openBan=openBan;
+
+async function doBan(){
+const uid=$('ban-uid').value,perm=$('ban-perm').checked,days=parseInt($('ban-days').value)||0,reason=clean($('ban-reason-inp').value,500);
+if(!perm&&days<=0){toast('Masukkan durasi','error');return}
+if(!reason){toast('Masukkan alasan','error');return}
+let until=null;if(!perm){const d=new Date();d.setDate(d.getDate()+days);until=d.toISOString()}
+try{await sb.from('users').update({banned:true,ban_reason:reason,ban_until:until}).eq('id',uid);
+toast('User dibanned!','success');closeModal('modal-ban');await loadUsers()}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.doBan=doBan;
+
+async function doUnban(uid){
+try{await sb.from('users').update({banned:false,ban_reason:null,ban_until:null}).eq('id',uid);
+toast('User di-unban!','success');await loadUsers()}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.doUnban=doUnban;
+
+// ========== ROLE CHANGER ==========
+async function loadChanger(){
+if(role!=='owner')return;
+try{const{data}=await sb.from('users').select('*').order('name');users=data||[];renderChanger(users)}catch(e){console.error(e)}
+}
+
+function searchChanger(){
+const q=$('changer-search-inp').value.toLowerCase();
+renderChanger(users.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
+}
+window.searchChanger=searchChanger;
+
+function renderChanger(list){
+const l=$('changer-list');
+l.innerHTML=list.filter(u=>u.email!==OWNER_EMAIL).map(u=>`<div class="user-item">
+<div class="user-item-info"><div class="user-item-av">${u.avatar_url?`<img src="${u.avatar_url}">`:'<i class="fas fa-user"></i>'}</div>
+<div><div class="user-item-name">${esc(u.name)}</div><div class="user-item-email">${esc(u.email||'')}</div>
+<div class="user-item-role-text">Role: ${u.role}</div></div></div>
+<div class="user-item-actions">${u.role==='admin'
+?`<button class="btn-sm btn-outline" onclick="chRole('${u.id}','member')"><i class="fas fa-arrow-down"></i> Unadmin</button>`
+:`<button class="btn-sm btn-purple" onclick="chRole('${u.id}','admin')"><i class="fas fa-arrow-up"></i> Jadikan Admin</button>`}</div></div>`).join('');
+}
+
+async function chRole(uid,nr){
+try{await sb.from('users').update({role:nr}).eq('id',uid);toast(`Role diubah jadi ${nr}!`,'success');await loadChanger()}catch(e){toast('Gagal: '+e.message,'error')}
+}
+window.chRole=chRole;
+
+// ========== REALTIME ==========
+function setupRT(){
+if(rtSub)sb.removeChannel(rtSub);
+rtSub=sb.channel('app-rt')
+.on('postgres_changes',{event:'*',schema:'public',table:'prompts'},()=>loadPrompts())
+.on('postgres_changes',{event:'*',schema:'public',table:'store_items'},()=>loadStore())
+.on('postgres_changes',{event:'INSERT',schema:'public',table:'announcements'},p=>{
+$('announce-text').textContent=p.new.content;$('chat-announce').classList.add('show');addNotif('📢 Pengumuman Baru',p.new.content)})
+.subscribe();
+}
+
+// ========== NOTIFICATIONS ==========
+let nCount=0;
+function addNotif(title,content){
+nCount++;const b=$('notif-badge');b.textContent=nCount;b.classList.add('show');
+const l=$('notif-list');if(l.querySelector('.notif-empty'))l.innerHTML='';
+const i=document.createElement('div');i.className='notif-item';
+i.innerHTML=`<div class="notif-item-t">${esc(title)}</div><div style="font-size:0.78rem;color:var(--text-secondary)">${esc(content)}</div><div class="notif-item-time">${new Date().toLocaleTimeString('id-ID')}</div>`;
+l.prepend(i);toast(title,'info');
+}
+
+// ========== SECURITY ==========
+let rc=0;
+const oFetch=window.fetch;
+window.fetch=function(...a){rc++;if(rc>200){console.warn('Rate limit');return Promise.reject(new Error('Rate limited'))}return oFetch.apply(this,a)};
+setInterval(()=>{rc=Math.max(0,rc-5)},1000);
+
+console.log('%c⚠️ STOP!','color:red;font-size:40px;font-weight:bold');
+console.log('%cJangan paste kode apapun di sini.','color:red;font-size:14px');
+</script>
+</body>
+</html>
